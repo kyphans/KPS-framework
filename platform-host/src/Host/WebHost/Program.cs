@@ -10,12 +10,43 @@ using Platform.Infrastructure.Events;
 using Platform.Infrastructure.MasterDb;
 using Platform.Infrastructure.Tenancy;
 using Billing.Module;
+using User.Module;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "KPS Platform API", Version = "v1" });
+
+    // Add Tenant Header support
+    c.AddSecurityDefinition("Tenant", new OpenApiSecurityScheme
+    {
+        Description = "Tenant Code (e.g. demo)",
+        Name = "X-Tenant-Code",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Tenant"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 // Infrastructure Services
 builder.Services.AddDbContext<MasterDbContext>(options => 
@@ -33,7 +64,8 @@ builder.Services.AddScoped<HookRegistry>();
 // Modules
 var modules = new List<IModule>
 {
-    new BillingModule()
+    new BillingModule(),
+    new UserModule()
 };
 
 foreach (var module in modules)
@@ -42,6 +74,13 @@ foreach (var module in modules)
 }
 
 var app = builder.Build();
+
+app.UseSwagger();
+app.UseSwaggerUI(c => 
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "KPS Platform API v1");
+    c.RoutePrefix = "swagger"; // Default
+});
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

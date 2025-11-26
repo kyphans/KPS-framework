@@ -10,6 +10,11 @@
     <ProjectReference Include="..\..\..\..\platform-core\src\Platform.Core\Platform.Core.csproj" />
     <ProjectReference Include="..\..\..\..\platform-infrastructure\src\Platform.Infrastructure\Platform.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\..\module-billing\src\Billing.Module\Billing.Module.csproj" />
+    <ProjectReference Include="..\..\..\..\module-user\src\User.Module\User.Module.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
 </Project>
