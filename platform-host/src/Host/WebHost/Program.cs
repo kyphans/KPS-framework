@@ -49,8 +49,10 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // Infrastructure Services
+// Use a shared path for MasterDb so CLI and WebHost see the same DB
+var dbPath = Path.Combine(AppContext.BaseDirectory, "PlatformMasterDb.sqlite");
 builder.Services.AddDbContext<MasterDbContext>(options => 
-    options.UseSqlServer(builder.Configuration.GetConnectionString("MasterDb") ?? @"Server=(localdb)\mssqllocaldb;Database=PlatformMasterDb;Trusted_Connection=True;MultipleActiveResultSets=true"));
+    options.UseSqlite($"Data Source={dbPath}"));
 
 builder.Services.AddDbContext<PlatformTenantDbContext>(); 
 
@@ -107,11 +109,22 @@ using (var scope = app.Services.CreateScope())
         {
             Id = "demo",
             Name = "Demo Tenant",
-            ConnectionString = @"Server=(localdb)\mssqllocaldb;Database=Platform_Demo;Trusted_Connection=True;MultipleActiveResultSets=true",
+            ConnectionString = "Data Source=Platform_Demo.sqlite",
             EnabledModulesJson = "[\"billing\"]"
         });
         db.SaveChanges();
     }
 }
+
+app.MapGet("/api/debug/tenants", async (MasterDbContext db) => 
+{
+    var tenants = await db.Tenants.ToListAsync();
+    return new 
+    { 
+        DbPath = dbPath,
+        Count = tenants.Count,
+        Tenants = tenants.Select(t => new { t.Id, t.Name })
+    };
+}).WithTags("Debug");
 
 app.Run();

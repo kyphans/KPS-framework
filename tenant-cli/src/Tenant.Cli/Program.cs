@@ -5,9 +5,9 @@ using Tenant.Cli.Commands;
 using Tenant.Cli.Services;
 
 // Setup DbContext
-var connectionString = @"Server=(localdb)\mssqllocaldb;Database=PlatformMasterDb;Trusted_Connection=True;MultipleActiveResultSets=true";
+var connectionString = "Data Source=PlatformMasterDb.sqlite";
 var optionsBuilder = new DbContextOptionsBuilder<MasterDbContext>();
-optionsBuilder.UseSqlServer(connectionString);
+optionsBuilder.UseSqlite(connectionString);
 
 using var dbContext = new MasterDbContext(optionsBuilder.Options);
 dbContext.Database.EnsureCreated(); // Ensure MasterDb exists

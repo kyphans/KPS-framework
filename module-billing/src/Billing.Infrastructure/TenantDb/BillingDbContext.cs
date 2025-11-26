@@ -1,19 +1,20 @@
 using Microsoft.EntityFrameworkCore;
 using Platform.Core.Tenancy;
-using Platform.Infrastructure.Docs;
+using Billing.Domain.Entities;
 
-namespace Platform.Infrastructure.Tenancy;
+namespace Billing.Infrastructure.TenantDb;
 
-public class PlatformTenantDbContext : DbContext
+public class BillingDbContext : DbContext
 {
     private readonly ITenantAccessor _tenantAccessor;
 
-    public PlatformTenantDbContext(DbContextOptions<PlatformTenantDbContext> options, ITenantAccessor tenantAccessor) : base(options)
+    public BillingDbContext(DbContextOptions<BillingDbContext> options, ITenantAccessor tenantAccessor) : base(options)
     {
         _tenantAccessor = tenantAccessor;
     }
 
-    public DbSet<DocEntity> Docs { get; set; }
+    public DbSet<Invoice> Invoices { get; set; }
+    public DbSet<Payment> Payments { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -24,13 +25,14 @@ public class PlatformTenantDbContext : DbContext
         }
         else
         {
-            throw new InvalidOperationException("Tenant context is not resolved or connection string is missing. Cannot configure PlatformTenantDbContext.");
+            throw new InvalidOperationException("Tenant context is not resolved or connection string is missing. Cannot configure BillingDbContext.");
         }
         base.OnConfiguring(optionsBuilder);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DocEntity>().HasKey(x => x.Id);
+        modelBuilder.Entity<Invoice>().HasKey(x => x.Id);
+        modelBuilder.Entity<Payment>().HasKey(x => x.Id);
     }
 }

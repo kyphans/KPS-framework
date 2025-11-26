@@ -25,7 +25,7 @@ public class TenantDbProvisioner
         }
 
         // For simplicity, use a localdb connection string based on tenant code
-        var connectionString = $@"Server=(localdb)\mssqllocaldb;Database=Platform_Tenant_{code};Trusted_Connection=True;MultipleActiveResultSets=true";
+        var connectionString = $"Data Source=Platform_Tenant_{code}.sqlite";
 
         var tenant = new TenantEntity
         {
@@ -44,7 +44,7 @@ public class TenantDbProvisioner
         // Create actual DB
         Console.WriteLine("Provisioning Tenant DB...");
         var optionsBuilder = new DbContextOptionsBuilder<PlatformTenantDbContext>();
-        optionsBuilder.UseSqlServer(connectionString);
+        optionsBuilder.UseSqlite(connectionString);
         
         var dummyAccessor = new DummyTenantAccessor(connectionString);
         using var tenantDb = new PlatformTenantDbContext(optionsBuilder.Options, dummyAccessor);

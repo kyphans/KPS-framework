@@ -20,7 +20,11 @@ public class UserDbContext : DbContext
         var tenant = _tenantAccessor.CurrentTenant;
         if (tenant != null && !string.IsNullOrEmpty(tenant.ConnectionString))
         {
-            optionsBuilder.UseSqlServer(tenant.ConnectionString);
+            optionsBuilder.UseSqlite(tenant.ConnectionString);
+        }
+        else
+        {
+            throw new InvalidOperationException("Tenant context is not resolved or connection string is missing. Cannot configure UserDbContext.");
         }
         base.OnConfiguring(optionsBuilder);
     }
